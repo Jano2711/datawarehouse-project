@@ -75,11 +75,11 @@ CASE WHEN sls_sales is null or sls_sales <=0 or sls_sales !=sls_quantity*ABS(sls
 		THEN  sls_quantity*ABS(sls_price) 
 	 ELSE sls_sales
 END AS sls_sales,
+sls_quantity
 CASE WHEN sls_price is null or sls_price <=0
 		 THEN sls_sales/NULLIF(sls_quantity,0)
 	 ELSE sls_price
 END AS sls_price,
-sls_price
 FROM
 bronze.crm_sales_details
 
