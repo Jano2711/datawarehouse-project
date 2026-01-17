@@ -1,3 +1,55 @@
+/*
+File: scripts/silver/ddl_silver.sql
+Purpose: Define Silver-layer table DDL for cleansed and curated data.
+
+Summary:
+ - Drops and recreates curated tables in the `silver` schema.
+ - Silver layer transforms and cleans raw bronze data, adding DWH metadata
+   (dwh_create_date) and standardizing column definitions.
+ - Tables serve as the source for Gold analytical views.
+
+Tables defined:
+ - silver.crm_cust_info
+   Curated customer dimension from CRM.
+   Columns: cst_id, cst_key, cst_firstname, cst_lastname, cst_marital_status,
+            cst_gndr, cst_create_date, dwh_create_date.
+
+ - silver.crm_prd_info
+   Curated product dimension from CRM.
+   Columns: prd_id, cat_id, prd_key, prd_nm, prd_cost, prd_line,
+            prd_start_dt, prd_end_dt, dwh_create_date.
+   Note: Includes cat_id for linking to category taxonomy.
+
+ - silver.crm_sales_details
+   Curated sales transactions from CRM.
+   Columns: sls_ord_num, sls_prd_key, sls_cust_id, sls_order_dt, sls_ship_dt,
+            sls_due_dt, sls_sales, sls_quantity, sls_price, dwh_create_date.
+
+ - silver.erp_cust_az12
+   Curated customer supplemental data from ERP.
+   Columns: cid, bdate, gen, dwh_create_date.
+
+ - silver.erp_loc_a101
+   Curated location/country data from ERP.
+   Columns: cid, cntry, dwh_create_date.
+
+ - silver.erp_px_cat_g1v2
+   Curated product category taxonomy from ERP.
+   Columns: id, cat, subcat, maintenance, dwh_create_date.
+
+Notes / Usage:
+ - This script is destructive: existing tables are dropped before
+   being recreated. Do not run in production without review/backups.
+ - All tables include a dwh_create_date timestamp (default GETDATE()).
+   Use this to track when records enter the DWH.
+ - Silver schema serves as the curated zone; Gold views consume these
+   tables and join them for analytics.
+ - Ensure Bronze tables are populated before running transformation logic
+   that populates Silver tables.
+
+Last updated: 2026-01-16 (generated)
+*/
+
 IF OBJECT_ID('silver.crm_cust_info', 'U') is Not null
 	DROP TABLE silver.crm_cust_info;
 create table silver.crm_cust_info(
